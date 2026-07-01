@@ -218,23 +218,35 @@ border-radius:6px;
 
 
 textarea{
+    height:40px;
+    resize:none;
+    overflow-y:auto;
 
-min-height:80px;
-
-resize:vertical;
-
+    /* Hide scrollbar */
+    scrollbar-width:none;      /* Firefox */
+    -ms-overflow-style:none;   /* IE/Edge */
 }
+
+textarea::-webkit-scrollbar{
+    display:none;              /* Chrome/Safari */
+}
+
+
+
+
+
 
 
 
 
 .titleInput{
 
-min-width:300px;
-
-min-height:80px;
+    min-width:300px;
+    height:120px;
+    resize:none;
 
 }
+
 
 
 
@@ -564,6 +576,17 @@ return String(str || "")
 
 }
 
+function autoResize(textarea){
+
+    textarea.style.height = "40px";
+
+    textarea.style.height =
+        Math.max(40, textarea.scrollHeight) + "px";
+
+}
+
+
+
 
 
 
@@ -593,11 +616,12 @@ tr.innerHTML=`
 
 <td>
 
-<textarea class="titleInput">
+<textarea
+class="titleInput"
+oninput="autoResize(this)"
+>${escapeHTML(data.title)}</textarea>
 
-${escapeHTML(data.title)}
 
-</textarea>
 
 </td>
 
@@ -677,11 +701,11 @@ onchange="createLink(this)">
 
 <td>
 
-<textarea>
+<textarea
+oninput="autoResize(this)"
+>${escapeHTML(data.notes)}</textarea>
 
-${escapeHTML(data.notes)}
 
-</textarea>
 
 
 </td>
@@ -710,6 +734,7 @@ tr.querySelector("td:nth-child(9) input")
 updateRowColor(
 tr.querySelector("td:nth-child(7) select")
 );
+
 
 
 }
