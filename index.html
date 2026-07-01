@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ADF RFI LOG</title>
+
+
+<style>
+
+/* ================= CSS ================= */
+
+*{
+box-sizing:border-box;
+font-family:"Segoe UI",Arial,sans-serif;
+}
+
+
+body{
+
+background:linear-gradient(135deg,#eef3f8,#dce6f1);
+
+padding:30px;
+
+color:#333;
+
+}
+
+
+h1{
+
+background:#1f4e79;
+
+color:white;
+
+padding:15px;
+
+border-radius:12px;
+
+text-align:center;
+
+}
+
+
+
+h2{
+
+background:#1f4e79;
+
+color:white;
+
+padding:20px;
+
+border-radius:12px;
+
+box-shadow:0 5px 15px rgba(0,0,0,.15);
+
+}
+
+
+
+
+.toolbar{
+
+background:white;
+
+padding:15px;
+
+border-radius:12px;
+
+margin-bottom:20px;
+
+box-shadow:0 4px 15px rgba(0,0,0,.1);
+
+}
+
+
+
+
+button{
+
+padding:10px 18px;
+
+margin-right:8px;
+
+border:none;
+
+border-radius:6px;
+
+background:#1f4e79;
+
+color:white;
+
+font-weight:bold;
+
+cursor:pointer;
+
+}
+
+
+
+button:hover{
+
+background:#2f75b5;
+
+}
+
+
+
+
+
+.searchBox{
+
+margin-top:15px;
+
+display:flex;
+
+gap:10px;
+
+flex-wrap:wrap;
+
+}
+
+
+
+
+
+.searchBox input{
+
+max-width:250px;
+
+border:2px solid #1f4e79;
+
+}
+
+
+
+
+
+.table-wrapper{
+
+overflow:auto;
+
+max-height:600px;
+
+}
+
+
+
+
+
+table{
+
+width:100%;
+
+border-collapse:collapse;
+
+background:white;
+
+border-radius:12px;
+
+overflow:hidden;
+
+box-shadow:0 5px 20px rgba(0,0,0,.15);
+
+}
+
+
+
+
+
+th{
+
+background:#111827;
+
+color:white;
+
+padding:14px;
+
+}
+
+
+
+
+
+td{
+
+padding:8px;
+
+border-bottom:1px solid #ddd;
+
+vertical-align:top;
+
+}
+
+
+
+
+
+input,
+textarea,
+select{
+
+width:100%;
+
+padding:8px;
+
+border:1px solid #ccc;
+
+border-radius:6px;
+
+}
+
+
+
+
+textarea{
+
+min-height:80px;
+
+resize:vertical;
+
+}
+
+
+
+
+.titleInput{
+
+min-width:300px;
+
+min-height:80px;
+
+}
+
+
+
+
+input[type="checkbox"]{
+
+width:auto;
+
+transform:scale(1.3);
+
+}
+
+
+
+
+.status-open td{
+
+background:#fff2cc!important;
+
+}
+
+
+
+.status-partial td{
+
+background:#d9ead3!important;
+
+}
+
+
+
+.status-closed td{
+
+background:#fce5cd!important;
+
+}
+
+
+
+.hiddenRow{
+
+display:none;
+
+}
+
+
+
+
+
+.fileTitle{
+
+font-size:12px;
+
+color:#666;
+
+}
+
+
+
+
+
+/* Animated File Link */
+
+
+.linkContainer{
+
+opacity:0;
+
+transform:translateY(-10px);
+
+transition:.35s ease;
+
+}
+
+
+
+.linkContainer.show{
+
+opacity:1;
+
+transform:translateY(0);
+
+}
+
+
+
+.linkContainer a{
+
+
+display:inline-flex;
+
+align-items:center;
+
+gap:8px;
+
+margin-top:5px;
+
+padding:8px 14px;
+
+background:#1f4e79;
+
+color:white;
+
+text-decoration:none;
+
+border-radius:6px;
+
+animation:pulseOpen .8s;
+
+}
+
+
+
+.linkContainer a:hover{
+
+background:#2f75b5;
+
+}
+
+
+
+
+@keyframes pulseOpen{
+
+
+0%{
+
+transform:scale(.8);
+
+opacity:.3;
+
+}
+
+
+
+50%{
+
+transform:scale(1.05);
+
+}
+
+
+
+100%{
+
+transform:scale(1);
+
+opacity:1;
+
+}
+
+
+}
+
+
+</style>
+
+
+</head>
+
+
+<body>
+
+
+<h1>(26-044) 2026-425_Cannoli Building 2 (2606-02)</h1>
+
+
+<h2>📋 ADF RFI LOG</h2>
+
+
+
+
+<div class="toolbar">
+
+
+<button onclick="addRow()">➕ New</button>
+
+<button onclick="saveData()">💾 Save</button>
+
+<button onclick="deleteSelected()">🗑 Delete</button>
+
+<button onclick="exportCSV()">📤 Export Excel</button>
+
+
+
+
+<div class="searchBox">
+
+
+<input id="searchRFI"
+placeholder="🔎 Search RFI Number..."
+onkeyup="filterTable()">
+
+
+
+<input id="searchADF"
+placeholder="🔎 Search ADF Number..."
+onkeyup="filterTable()">
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="table-wrapper">
+
+
+<table>
+
+
+<thead>
+
+
+<tr>
+
+<th>Select</th>
+<th>Prevents</th>
+<th>RFI Number</th>
+<th>Corresponding ADF Number</th>
+<th>Title</th>
+<th>Response Received</th>
+<th>Status</th>
+<th>Action Required</th>
+<th>Folder/File Link</th>
+<th>Notes</th>
+
+</tr>
+
+
+</thead>
+
+
+
+<tbody id="tableBody"></tbody>
+
+
+
+</table>
+
+
+</div>
+
+
+
+
+
+
+<script type="module">
+
+import { initializeApp } from
+"https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+
+import {
+    getDatabase,
+    ref,
+    set,
+    get,
+    onValue,
+    update,
+    push
+} from
+"https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyDXEmBVypl8nldeyfwnoJIwoEo3zb63k3I",
+
+  authDomain:
+  "cannolibldg2-rfi-log.firebaseapp.com",
+
+  databaseURL:
+  "https://cannolibldg2-rfi-log-default-rtdb.asia-southeast1.firebasedatabase.app",
+
+  projectId:
+  "cannolibldg2-rfi-log",
+
+  storageBucket:
+  "cannolibldg2-rfi-log.firebasestorage.app",
+
+  messagingSenderId:
+  "184365101993",
+
+  appId:
+  "1:184365101993:web:d80883cda55e8dd2840ab8"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+console.log("🔥 Firebase Connected!");
+set(
+    ref(db, "test"),
+    {
+        message: "ADF RFI LOG CONNECTED"
+    }
+);
+
+console.log("✅ Test data sent");
+onValue(
+    ref(db, "test"),
+    (snapshot) => {
+
+        console.log(
+            "📥 Received:",
+            snapshot.val()
+        );
+
+    }
+);
+
+
+
+
+function escapeHTML(str){
+
+return String(str || "")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;");
+
+}
+
+
+
+
+function createRow(data={}){
+
+
+let tr=document.createElement("tr");
+tr.setAttribute("data-id", data.id);
+
+
+
+tr.innerHTML=`
+
+
+<td><input type="checkbox"></td>
+
+
+<td><input value="${escapeHTML(data.prevents)}"></td>
+
+
+<td><input value="${escapeHTML(data.rfi)}"></td>
+
+
+<td><input value="${escapeHTML(data.adf)}"></td>
+
+
+
+<td>
+
+<textarea class="titleInput">
+
+${escapeHTML(data.title)}
+
+</textarea>
+
+</td>
+
+
+
+<td>
+
+<input type="date" value="${data.date || ''}">
+
+</td>
+
+
+
+<td>
+
+
+<select onchange="updateRowColor(this)">
+
+
+<option ${data.status=="Open"?"selected":""}>
+Open
+</option>
+
+
+<option ${data.status=="Partial/Open"?"selected":""}>
+Partial/Open
+</option>
+
+
+<option ${data.status=="Closed/Response"?"selected":""}>
+Closed/Response
+</option>
+
+
+</select>
+
+
+</td>
+
+
+
+<td>
+
+
+<select>
+
+<option>Updated/Done</option>
+
+<option>No action required</option>
+
+<option>Partial/Open</option>
+
+</select>
+
+
+</td>
+
+
+
+
+<td>
+
+
+<input value="${escapeHTML(data.file)}"
+
+onchange="createLink(this)">
+
+
+
+<div class="linkContainer"></div>
+
+
+</td>
+
+
+
+
+<td>
+
+<textarea>
+
+${escapeHTML(data.notes)}
+
+</textarea>
+
+
+</td>
+
+
+`;
+
+
+
+document
+.getElementById("tableBody")
+.appendChild(tr);
+
+
+
+if(data.file){
+
+createLink(
+tr.querySelector("td:nth-child(9) input")
+);
+
+}
+
+
+
+updateRowColor(
+tr.querySelector("td:nth-child(7) select")
+);
+
+
+}
+
+
+
+
+
+function updateRowColor(select){
+
+
+let row=select.closest("tr");
+
+row.classList.remove(
+"status-open",
+"status-partial",
+"status-closed"
+);
+
+
+
+if(select.value=="Open")
+
+row.classList.add("status-open");
+
+
+
+if(select.value=="Partial/Open")
+
+row.classList.add("status-partial");
+
+
+
+if(select.value=="Closed/Response")
+
+row.classList.add("status-closed");
+
+
+
+    // saveData();
+
+}
+
+
+
+
+
+
+function createLink(input){
+
+    let box = input.parentElement.querySelector(".linkContainer");
+
+    box.innerHTML = "";
+    box.classList.remove("show");
+
+    let url = input.value.trim();
+
+    if(!url) return;
+
+    // 🔥 FIX: auto-add https if missing
+    if(!url.startsWith("http://") && !url.startsWith("https://")){
+        url = "https://" + url;
+    }
+
+    let name = url.split("/").pop();
+
+    box.innerHTML = `
+        <div class="fileTitle">
+            📄 File: ${name}
+        </div>
+
+        <a href="${url}" target="_blank" rel="noopener noreferrer">
+            📂 Open File
+        </a>
+    `;
+
+    setTimeout(() => {
+        box.classList.add("show");
+    }, 50);
+}
+
+
+
+
+
+
+
+function animateOpen(link){
+
+
+link.innerHTML="⏳ Opening...";
+
+link.style.pointerEvents="none";
+
+
+
+setTimeout(()=>{
+
+
+link.innerHTML="📂 Open File";
+
+link.style.pointerEvents="auto";
+
+
+},1000);
+
+
+}
+
+
+
+
+
+function addRow(){
+
+    let newRow = {
+        prevents: "",
+        rfi: "",
+        adf: "",
+        title: "",
+        date: "",
+        status: "Open",
+        action: "",
+        file: "",
+        notes: ""
+    };
+
+    const newRef = push(ref(db,"ADF_RFI_DATA"));
+    set(newRef, newRow);
+}
+
+
+
+
+
+
+function saveData(){
+
+    document.querySelectorAll("#tableBody tr").forEach(row => {
+
+        const id = row.getAttribute("data-id");
+        if(!id) return;
+
+        const c = row.querySelectorAll("input,select,textarea");
+
+        update(ref(db,"ADF_RFI_DATA/" + id), {
+
+            prevents: c[1].value,
+            rfi: c[2].value,
+            adf: c[3].value,
+            title: c[4].value,
+            date: c[5].value,
+            status: c[6].value,
+            action: c[7].value,
+            file: c[8].value,
+            notes: c[9].value
+
+        });
+
+    });
+
+}
+
+
+
+
+
+
+function loadData(){
+
+    onValue(ref(db,"ADF_RFI_DATA"), (snapshot) => {
+
+        document.getElementById("tableBody").innerHTML = "";
+
+        snapshot.forEach(child => {
+
+            let row = child.val();
+            row.id = child.key;   // 🔥 THIS IS CRITICAL
+
+            createRow(row);
+
+        });
+
+    });
+
+}
+
+
+
+
+
+
+
+
+function deleteSelected(){
+
+    if(!confirm("Delete selected rows?")) return;
+
+    const updates = {};
+
+    document.querySelectorAll("#tableBody tr").forEach(row => {
+
+        const checkbox = row.querySelector("input[type=checkbox]");
+        const id = row.getAttribute("data-id");
+
+        if(checkbox && checkbox.checked && id){
+
+            updates[id] = null; // mark for deletion in Firebase
+
+        }
+
+    });
+
+    // one single Firebase write (fast + multi-user safe)
+    update(ref(db, "ADF_RFI_DATA"), updates);
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function exportCSV(){
+
+
+let csv=[];
+
+
+
+csv.push([
+
+"Prevents",
+"RFI Number",
+"ADF Number",
+"Title",
+"Response Received",
+"Status",
+"Action Required",
+"Folder/File Link",
+"Notes"
+
+].join(","));
+
+
+
+
+
+document.querySelectorAll("#tableBody tr")
+
+.forEach(row=>{
+
+
+let c=row.querySelectorAll(
+
+"input,select,textarea"
+
+);
+
+
+
+let data=[
+
+c[1].value,
+c[2].value,
+c[3].value,
+c[4].value,
+c[5].value,
+c[6].value,
+c[7].value,
+c[8].value,
+c[9].value
+
+];
+
+
+
+csv.push(
+
+data.map(v=>`"${v.replace(/"/g,'""')}"`).join(",")
+
+);
+
+
+});
+
+
+
+
+let blob=new Blob(
+
+[csv.join("\n")],
+
+{type:"text/csv"}
+
+);
+
+
+
+let link=document.createElement("a");
+
+link.href=URL.createObjectURL(blob);
+
+link.download="ADF_RFI_LOG.csv";
+
+link.click();
+
+
+}
+
+
+
+
+
+
+function filterTable(){
+
+
+let rfiSearch=document
+.getElementById("searchRFI")
+.value.toLowerCase();
+
+
+
+let adfSearch=document
+.getElementById("searchADF")
+.value.toLowerCase();
+
+
+
+
+document.querySelectorAll("#tableBody tr")
+
+.forEach(row=>{
+
+
+let fields=row.querySelectorAll(
+
+"input,textarea"
+
+);
+
+
+
+let rfi=fields[2].value.toLowerCase();
+
+let adf=fields[3].value.toLowerCase();
+
+
+
+if(
+rfi.includes(rfiSearch)
+&&
+adf.includes(adfSearch)
+)
+
+row.classList.remove("hiddenRow");
+
+
+else
+
+row.classList.add("hiddenRow");
+
+
+});
+
+
+}
+
+
+
+
+
+// removed - DO NOT USE this anymore
+
+window.addRow = addRow;
+window.saveData = saveData;
+window.deleteSelected = deleteSelected;
+window.exportCSV = exportCSV;
+window.filterTable = filterTable;
+window.updateRowColor = updateRowColor;
+window.createLink = createLink;
+window.animateOpen = animateOpen;
+
+
+window.onload=function(){
+
+loadData();
+
+};
+
+
+
+</script>
+
+
+</body>
+
+</html>
